@@ -1,0 +1,93 @@
+version: "2"
+services:
+    mongos:
+        image: docker.io/mahanteshd4140/mongo_shard:core_mongo
+        container_name: mongos
+        hostname: mongos
+        ports:
+        - 27026:27026
+        networks:
+           mongodb:
+                ipv4_address: 10.5.0.8
+        command: bash -c "/usr/bin/create_mongos; /usr/bin/create_mongos_service; /bin/bash"
+        tty: true
+        depends_on:
+        - cfg-1
+
+    rs-1:
+        image: docker.io/mahanteshd4140/mongo_shard:core_mongo
+        container_name: rs-1
+        hostname: rs-1
+        networks:
+            mongodb:
+                ipv4_address: 10.5.0.5
+        command: bash -c "/usr/bin/create_replicaset; /usr/bin/replicaset-shard; /usr/bin/create_mongod_service; /bin/bash"
+        tty: true
+        depends_on:
+        - rs-2
+
+    rs-2:
+        image: docker.io/mahanteshd4140/mongo_shard:core_mongo
+        container_name: rs-2
+        hostname: rs-2
+        networks:
+            mongodb:
+                ipv4_address: 10.5.0.6
+        command: bash -c "/usr/bin/create_replicaset; /usr/bin/create_mongod_service; /bin/bash"
+        tty: true
+        depends_on:
+        - rs-3
+
+    rs-3:
+        image: docker.io/mahanteshd4140/mongo_shard:core_mongo
+        container_name: rs-3
+        hostname: rs-3
+        networks:
+            mongodb:
+                ipv4_address: 10.5.0.7
+        command: bash -c "/usr/bin/create_replicaset; /usr/bin/create_mongod_service; /bin/bash"
+        tty: true
+        depends_on:
+        - cfg-1
+
+    cfg-1:
+        image: docker.io/mahanteshd4140/mongo_shard:core_mongo
+        container_name: cfg-1
+        hostname: cfg-1
+        networks:
+            mongodb:
+                ipv4_address: 10.5.0.2
+        command: bash -c "/usr/bin/create_configsvr; /usr/bin/configsvr-shard; /usr/bin/create_mongod_service; /bin/bash"
+        tty: true
+        depends_on:
+        - cfg-2
+
+    cfg-2:
+        image: docker.io/mahanteshd4140/mongo_shard:core_mongo
+        container_name: cfg-2
+        hostname: cfg-2
+        networks:
+            mongodb:
+                ipv4_address: 10.5.0.3
+        command: bash -c "/usr/bin/create_configsvr; /usr/bin/create_mongod_service; /bin/bash"
+        tty: true
+        depends_on:
+        - cfg-3
+
+    cfg-3:
+        image: docker.io/mahanteshd4140/mongo_shard:core_mongo
+        container_name: cfg-3
+        hostname: cfg-3
+        networks:
+            mongodb:
+                ipv4_address: 10.5.0.4
+        command: bash -c "/usr/bin/create_configsvr; /usr/bin/create_mongod_service; /bin/bash"
+        tty: true
+
+networks:
+  mongodb:
+    driver: bridge
+    ipam:
+     config:
+       - subnet: 10.5.0.0/16
+         gateway: 10.5.0.1
