@@ -1,7 +1,7 @@
 version: "2"
 services:
   cass-1:
-    image: localhost:5000/cassandra:core_cassandra
+    image: docker.io/mahanteshd4140/cassandra:core_cassandra
     container_name: cass-1
     hostname: cass-1
     networks:
@@ -10,7 +10,7 @@ services:
     command: bash -c "/usr/bin/install_cassandra.sh; sleep 180s; /bin/bash"
     tty: true
   cass-2:
-    image: localhost:5000/cassandra:core_cassandra
+    image: docker.io/mahanteshd4140/cassandra:core_cassandra
     container_name: cass-2
     hostname: cass-2
     networks:
@@ -21,7 +21,7 @@ services:
     depends_on:
       - cass-1
   cass-3:
-    image: localhost:5000/cassandra:core_cassandra
+    image: docker.io/mahanteshd4140/cassandra:core_cassandra
     container_name: cass-3
     hostname: cass-3
     networks:
