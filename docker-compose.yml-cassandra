@@ -1,0 +1,40 @@
+version: "2"
+services:
+  cass-1:
+    image: localhost:5000/cassandra:core_cassandra
+    container_name: cass-1
+    hostname: cass-1
+    networks:
+      cassandra:
+        ipv4_address: 10.5.0.2
+    command: bash -c "/usr/bin/install_cassandra.sh; sleep 180s; /bin/bash"
+    tty: true
+  cass-2:
+    image: localhost:5000/cassandra:core_cassandra
+    container_name: cass-2
+    hostname: cass-2
+    networks:
+      cassandra:
+        ipv4_address: 10.5.0.3
+    command: bash -c "/usr/bin/install_cassandra.sh; /bin/bash"
+    tty: true
+    depends_on:
+      - cass-1
+  cass-3:
+    image: localhost:5000/cassandra:core_cassandra
+    container_name: cass-3
+    hostname: cass-3
+    networks:
+      cassandra:
+        ipv4_address: 10.5.0.4
+    command: bash -c "/usr/bin/install_cassandra.sh; /bin/bash"
+    tty: true
+    depends_on:
+      - cass-1
+networks:
+  cassandra:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 10.5.0.0/16
+          gateway: 10.5.0.1
