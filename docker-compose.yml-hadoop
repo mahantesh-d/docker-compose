@@ -1,0 +1,63 @@
+version: '2'
+services:
+  hadoop-master-cmp:
+    image: docker.io/mahanteshd4140/hadoop:3.3
+    container_name: hadoop-master-cmp
+    hostname: hadoop-master-cmp
+    ports:
+      - 9870:9870
+      - 8088:8088
+    networks:
+      hadoop-net:
+        ipv4_address: 10.6.0.2
+    command: | 
+        bash -c 
+        "sed -i 's/hadoop/hadoop-master-cmp/' /opt/hadoop/hadoop/etc/hadoop/core-site.xml;
+        echo -e '10.6.0.3 \thadoop-slave-cmp-1 \n10.6.0.4 \thadoop-slave-cmp-2' >> /etc/hosts;
+        echo -e 'hadoop-slave-cmp-1 \nhadoop-slave-cmp-2' >> /opt/hadoop/hadoop/etc/hadoop/workers
+        /usr/sbin/sshd -D;
+        /bin/bash"
+    tty: true
+    privileged: true
+    
+  hadoop-slave-1-cmp:
+    image: docker.io/mahanteshd4140/hadoop:3.3
+    container_name: hadoop-slave-cmp-1
+    hostname: hadoop-slave-cmp-1
+    networks:
+      hadoop-net:
+        ipv4_address: 10.6.0.3    
+    command: |
+         bash -c 
+         "sed -i 's/hadoop/hadoop-master-cmp/' /opt/hadoop/hadoop/etc/hadoop/core-site.xml; 
+         echo -e '10.6.0.2 \t hadoop-master-cmp \n10.6.0.4 \t hadoop-slave-cmp-2' >> /etc/hosts; 
+         /usr/sbin/sshd -D;
+         /bin/bash"     
+    tty: true
+    depends_on:
+      - hadoop-master-cmp
+
+  hadoop-slave-2-cmp:
+    image: docker.io/mahanteshd4140/hadoop:3.3
+    container_name: hadoop-slave-cmp-2
+    hostname: hadoop-slave-cmp-2
+    networks:
+      hadoop-net:
+        ipv4_address: 10.6.0.4
+    command: |
+          bash -c 
+          "sed -i 's/hadoop/hadoop-master-cmp/' /opt/hadoop/hadoop/etc/hadoop/core-site.xml; 
+          echo -e '10.6.0.2 \t hadoop-master-cmp \n10.6.0.3 \t hadoop-slave-cmp-1' >> /etc/hosts; 
+          /usr/sbin/sshd -D;
+          /bin/bash"    
+    tty: true
+    depends_on:
+      - hadoop-master-cmp
+
+networks:
+  hadoop-net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 10.6.0.0/16
+          gateway: 10.6.0.1
